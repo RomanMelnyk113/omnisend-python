@@ -20,10 +20,7 @@ class Omnisend:
         self.api_url = api_url or DEFAULT_BASE_URL + API_VERSION_3
 
     def _prepare_headers(self):
-        return {
-            "X-API-KEY": self.api_key,
-            # 'Content-Type': 'application/x-www-form-urlencoded'
-        }
+        return {"X-API-KEY": self.api_key}
 
     def _generate_url(self, endpoint):
         return self.api_url + endpoint
@@ -57,3 +54,6 @@ class Omnisend:
             )
         result = self._send_request(endpoint, contact_info)
         return result
+
+    def get_contact(self, contact_id: str):
+        pass
