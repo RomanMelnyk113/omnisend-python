@@ -33,7 +33,7 @@ class Omnisend:
     def _send_request(self, endpoint: str, data: dict = None, method="post") -> dict:
         kwargs = {"headers": self._prepare_headers()}
         func = getattr(requests, method)
-        if method == "post":
+        if method in ["post", "patch", "put"]:
             kwargs["json"] = data
 
         r = func(self._generate_url(endpoint), **kwargs)
