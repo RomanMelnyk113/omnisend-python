@@ -80,10 +80,10 @@ class Order(Schema):
     discountSum = fields.Int()
     taxSum = fields.Int()
     shippingSum = fields.Int()
-    created_at = fields.DateTime(
+    createdAt = fields.DateTime(
         format="%Y-%m-%dT%H:%M:%S+00:00", default=datetime.utcnow()
     )
-    updated_at = fields.DateTime(
+    updatedAt = fields.DateTime(
         format="%Y-%m-%dT%H:%M:%S+00:00", default=datetime.utcnow()
     )
     contactNote = fields.Str()
