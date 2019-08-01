@@ -47,7 +47,7 @@ setup(
     ],
     keywords="omnisend python",
     packages=["omnisend"],
-    install_requires=["requests"],
+    install_requires=["requests", "marshmallow"],
     python_requires=">=3.5",
     extras_require={"dev": ["pytest"]},
 )
