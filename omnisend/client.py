@@ -3,9 +3,9 @@ from http import HTTPStatus
 from typing import Tuple, Union
 
 import requests
-from marshmallow import ValidationError
+from marshmallow import Schema, ValidationError
 
-from omnisend.models import Cart, Contact
+from omnisend.models import Cart, Contact, Order
 
 DEFAULT_BASE_URL = "https://api.omnisend.com/"
 API_VERSION_3 = "v3"
@@ -44,6 +44,20 @@ class Omnisend:
 
         return res
 
+    def send_request(
+        self, endpoint: str, schema: "Schema()", data: dict = None, method="post"
+    ) -> Tuple[Union[dict, None], Union[dict, None]]:
+        self._clear_errors()
+        schema = schema()
+        try:
+            result = schema.dump(data)
+        except ValidationError as err:
+            self.errors = err.messages
+            return None, self.errors
+
+        response = self._send_request(endpoint, result, method=method)
+        return (None, self.errors) if self.errors else (response, None)
+
     def create_contact(self, data: dict) -> Tuple[Union[dict, None], Union[dict, None]]:
         """
         Create new contact from provided data
@@ -53,17 +67,8 @@ class Omnisend:
         :type data: dict - new contact data
         """
 
-        self._clear_errors()
         endpoint = "/contacts"
-        contact_schema = Contact()
-        try:
-            result = contact_schema.dump(data)
-        except ValidationError as err:
-            self.errors = err.messages
-            return None, self.errors
-
-        response = self._send_request(endpoint, data=result, method="post")
-        return (None, self.errors) if self.errors else (response, None)
+        return self.send_request(endpoint, schema=Contact, data=data, method="post")
 
     def get_contact(self, contact_id: str):
         pass
@@ -76,33 +81,36 @@ class Omnisend:
         :param cart_info:
         :return:
         """
-        self._clear_errors()
         endpoint = "/carts"
-        cart_schema = Cart()
-        try:
-            result = cart_schema.dump(data)
-        except ValidationError as err:
-            self.errors = err.messages
-            return None, self.errors
-
-        response = self._send_request(endpoint, result)
-        return (None, self.errors) if self.errors else (response, None)
+        return self.send_request(endpoint, schema=Cart, data=data, method="post")
 
     def get_cart(self, cart_id: str) -> Tuple[Union[dict, None], Union[dict, None]]:
         self._clear_errors()
         endpoint = "/carts/{}".format(cart_id)
-        response = self._send_request(endpoint, method="get")
-        return (None, self.errors) if self.errors else (response, None)
+        return self.send_request(endpoint, schema=Cart, method="get")
 
     def update_cart(self, cart_id: str, data: dict):
         self._clear_errors()
         endpoint = "/carts/{}".format(cart_id)
-        cart_schema = Cart()
-        try:
-            result = cart_schema.dump(data)
-        except ValidationError as err:
-            self.errors = err.messages
-            return None, self.errors
+        return self.send_request(endpoint, schema=Cart, data=data, method="patch")
 
-        response = self._send_request(endpoint, result)
-        return (None, self.errors) if self.errors else (response, None)
+    def replace_cart(self, cart_id: str, data: dict):
+        self._clear_errors()
+        endpoint = "/carts/{}".format(cart_id)
+        return self.send_request(endpoint, schema=Cart, data=data, method="put")
+
+    def replace_cart_product(self, cart_id: str, cart_product_id: str, data: dict):
+        self._clear_errors()
+        endpoint = "/carts/{}/products/{}".format(cart_id, cart_product_id)
+        return self.send_request(endpoint, schema=Cart, data=data, method="put")
+
+    def create_order(self, data: dict) -> Tuple[Union[Cart, None], Union[dict, None]]:
+        """
+        Create new order
+        More details can be found here:
+        https://api-docs.omnisend.com/v3/orders/create-new-order
+        :param data:
+        :return:
+        """
+        endpoint = "/orders"
+        return self.send_request(endpoint, schema=Order, data=data, method="post")
