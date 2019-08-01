@@ -5,7 +5,7 @@ from typing import Tuple, Union
 import requests
 from marshmallow import ValidationError
 
-from omnisend.models import Contact
+from omnisend.models import Cart, Contact
 
 DEFAULT_BASE_URL = "https://api.omnisend.com/"
 API_VERSION_3 = "v3"
@@ -63,4 +63,46 @@ class Omnisend:
             return None, self.errors
 
         response = self._send_request(endpoint, data=result, method="post")
+        return (None, self.errors) if self.errors else (response, None)
+
+    def get_contact(self, contact_id: str):
+        pass
+
+    def create_cart(self, data: dict) -> Tuple[Union[dict, None], Union[dict, None]]:
+        """
+        Create new cart
+        More details can be found here:
+        https://api-docs.omnisend.com/v3/carts/create-new-cart
+        :param cart_info:
+        :return:
+        """
+        self._clear_errors()
+        endpoint = "/carts"
+        cart_schema = Cart()
+        try:
+            result = cart_schema.dump(data)
+        except ValidationError as err:
+            self.errors = err.messages
+            return None, self.errors
+
+        response = self._send_request(endpoint, result)
+        return (None, self.errors) if self.errors else (response, None)
+
+    def get_cart(self, cart_id: str) -> Tuple[Union[dict, None], Union[dict, None]]:
+        self._clear_errors()
+        endpoint = "/carts/{}".format(cart_id)
+        response = self._send_request(endpoint, method="get")
+        return (None, self.errors) if self.errors else (response, None)
+
+    def update_cart(self, cart_id: str, data: dict):
+        self._clear_errors()
+        endpoint = "/carts/{}".format(cart_id)
+        cart_schema = Cart()
+        try:
+            result = cart_schema.dump(data)
+        except ValidationError as err:
+            self.errors = err.messages
+            return None, self.errors
+
+        response = self._send_request(endpoint, result)
         return (None, self.errors) if self.errors else (response, None)
