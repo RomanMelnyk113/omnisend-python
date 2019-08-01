@@ -104,7 +104,7 @@ class Omnisend:
         endpoint = "/carts/{}/products/{}".format(cart_id, cart_product_id)
         return self.send_request(endpoint, schema=Cart, data=data, method="put")
 
-    def create_order(self, data: dict) -> Tuple[Union[Cart, None], Union[dict, None]]:
+    def create_order(self, data: dict) -> Tuple[Union[dict, None], Union[dict, None]]:
         """
         Create new order
         More details can be found here:
@@ -114,3 +114,16 @@ class Omnisend:
         """
         endpoint = "/orders"
         return self.send_request(endpoint, schema=Order, data=data, method="post")
+
+    def update_order_status(
+        self, order_id: str, data: dict
+    ) -> Tuple[Union[dict, None], Union[dict, None]]:
+        """
+        Create new order
+        More details can be found here:
+        https://api-docs.omnisend.com/v3/orders/create-new-order
+        :param data:
+        :return:
+        """
+        endpoint = "/orders/{}".format(order_id)
+        return self.send_request(endpoint, schema=Order, data=data, method="patch")
